@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서울시 × 당근 상생 파일럿: 인터랙티브 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Carrot Neutral -->
+    <!-- Application Structure Plan: A thematic, scroll-based narrative dashboard. It starts with a high-level summary, then guides the user through the project's 'Why', 'What', 'Where', 'Impact', and 'How'. This structure is chosen to transform a dense business proposal into a compelling, easy-to-digest story, with key data points made interactive to highlight their significance, especially the P&L simulation. -->
+    <!-- Visualization & Content Choices: 
+        - P&L Table -> Goal: Show Profit Gain -> Interactive Bar Chart -> Interaction: Button click to animate profit increase -> Justification: More engaging and impactful than a static table, clearly shows the "Daangn Advantage" -> Library: Chart.js.
+        - Pilot Zone Comparison -> Goal: Compare two distinct locations -> Two-column layout with a toggle -> Interaction: User clicks toggle to switch data view -> Justification: Allows for direct, side-by-side comparison without scrolling, enhancing comprehension -> Library: Vanilla JS.
+        - KPI Targets -> Goal: Inform on goals -> Stat cards with large numbers -> Interaction: Hover effect for detail -> Justification: Provides a quick, scannable overview of project targets -> Library: HTML/CSS/JS.
+        - RACI Table -> Goal: Explain stakeholder roles -> Interactive Diagram -> Interaction: Click on a stakeholder to highlight their responsibilities -> Justification: Simplifies a dense table, making complex information explorable and less intimidating -> Library: HTML/CSS/JS.
+        - Core Mechanics -> Goal: Explain the solutions -> Clickable Cards -> Interaction: Click to expand/reveal details -> Justification: Organizes information cleanly, preventing user overload by presenting information progressively -> Library: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FFFAF5;
+            color: #333;
+        }
+        .highlight {
+            color: #FF6F00;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #555;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            line-height: 1.8;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #FF6F00;
+            border-bottom-color: #FF6F00;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        .raci-item.active {
+            background-color: #FF6F00 !important;
+            color: white !important;
+        }
+        .raci-item.active span {
+             color: white !important;
+        }
+        .raci-role.highlight-role {
+            background-color: #FFF7F0;
+            border-left: 4px solid #FF6F00;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Hero Section -->
+    <header id="home" class="bg-white">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">서울시 <span class="highlight">×</span> 당근 상생 프로젝트</h1>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#vision" class="text-gray-600 hover:text-orange-500">사업 비전</a>
+                <a href="#solution" class="text-gray-600 hover:text-orange-500">핵심 솔루션</a>
+                <a href="#pilot" class="text-gray-600 hover:text-orange-500">파일럿 상권</a>
+                <a href="#impact" class="text-gray-600 hover:text-orange-500">기대 효과</a>
+                <a href="#roadmap" class="text-gray-600 hover:text-orange-500">로드맵</a>
+            </nav>
+        </div>
+        <div class="container mx-auto px-6 py-16 md:py-24 text-center">
+            <p class="text-lg md:text-xl font-semibold text-orange-500 mb-2">동네를 여는 문, 당근</p>
+            <h2 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-4">서울시 로컬브랜드 상권, <br>디지털로 날개를 달다</h2>
+            <p class="text-base md:text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+                서울시의 '지속가능 상권' 비전과 당근의 '하이퍼로컬' 기술이 만나 소상공인의 실질적 성장을 지원합니다.<br>포장주문·QR오더 중심의 KPI 달성형 상생 모델을 제안합니다.
+            </p>
+            <a href="#vision" class="bg-orange-500 text-white font-bold py-3 px-8 rounded-full hover:bg-orange-600 transition duration-300 text-lg">
+                프로젝트 알아보기
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Vision Section -->
+        <section id="vision" class="py-20 px-6">
+            <div class="container mx-auto">
+                <h2 class="section-title">왜 지금, 이 사업이 필요한가?</h2>
+                <p class="section-subtitle">
+                    단기 지원을 넘어 상권의 자생력을 키우려는 서울시의 정책 목표와, 동네의 가치를 연결하려는 당근의 비즈니스 전략이 만나는 최적의 타이밍입니다. 본 프로젝트는 두 주체의 목표를 동시에 달성하는 강력한 시너지를 창출합니다.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    <div class="card text-center">
+                        <div class="text-5xl mb-4">🏙️</div>
+                        <h3 class="text-2xl font-bold mb-2">서울시: 지속가능한 상권</h3>
+                        <p class="text-gray-600">단순 지원이 아닌, 지역자원과 문화를 결합한 '머물고 싶은 상권'을 조성하여 골목상권의 근본적인 경쟁력 강화를 목표로 합니다.</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-5xl mb-4">🥕</div>
+                        <h3 class="text-2xl font-bold mb-2">당근: 하이퍼로컬 인프라</h3>
+                        <p class="text-gray-600">'동네를 여는 문'이라는 비전 아래, 단순 중고거래를 넘어 지역 커뮤니티와 비즈니스를 잇는 필수 디지털 인프라로 진화하고 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution Section -->
+        <section id="solution" class="py-20 px-6 bg-white">
+            <div class="container mx-auto">
+                <h2 class="section-title">무엇을 제안하는가?</h2>
+                 <p class="section-subtitle">
+                    소상공인의 가장 큰 고민인 '수수료 부담'과 '운영 효율' 문제를 직접적으로 해결하는 네 가지 핵심 솔루션을 패키지로 제공합니다. 각 솔루션은 상호 보완적으로 작동하여 상권 전체의 활력을 높입니다.
+                </p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card solution-card cursor-pointer">
+                        <h3 class="text-xl font-bold mb-2">📦 포장주문 확산</h3>
+                        <p class="text-gray-600 mb-4">수수료 0% 포장주문으로 소상공인 순이익을 직접적으로 개선합니다.</p>
+                        <div class="details hidden mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-700"><strong>• 목표:</strong> 배달앱의 높은 수수료 부담을 없애고, 점포의 핵심 수익 채널인 포장 판매를 활성화합니다.</p>
+                            <p class="text-sm text-gray-700 mt-2"><strong>• 실행:</strong> 초기 2주 집중 온보딩, 첫주문 쿠폰, 앱 내 노출 강화를 통해 빠르게 사용자를 확보합니다.</p>
+                        </div>
+                    </div>
+                    <div class="card solution-card cursor-pointer">
+                        <h3 class="text-xl font-bold mb-2">📱 QR 테이블오더</h3>
+                        <p class="text-gray-600 mb-4">피크타임 주문 병목을 해소하고 매장 운영 효율을 극대화합니다.</p>
+                        <div class="details hidden mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-700"><strong>• 목표:</strong> 주문/결제 업무를 자동화하여 직원은 서비스에 집중하고, 테이블 회전율을 높입니다.</p>
+                            <p class="text-sm text-gray-700 mt-2"><strong>• 실행:</strong> '런치 러시 패스트레인' 캠페인으로 직장인 밀집 상권의 점심시간 문제를 해결하는 시그니처 모델을 구축합니다.</p>
+                        </div>
+                    </div>
+                    <div class="card solution-card cursor-pointer">
+                        <h3 class="text-xl font-bold mb-2">🏃 상권 스탬프런</h3>
+                        <p class="text-gray-600 mb-4">게임화(Gamification)를 통해 상권 내 고객 탐색과 재방문을 유도합니다.</p>
+                        <div class="details hidden mt-4 pt-4 border-t border-gray-200">
+                             <p class="text-sm text-gray-700"><strong>• 목표:</strong> 고객이 상권 전체를 하나의 브랜드로 경험하게 하여 체류 시간과 충성도를 높입니다.</p>
+                             <p class="text-sm text-gray-700 mt-2"><strong>• 실행:</strong> 3~5개 점포를 QR스캔으로 방문하는 미션을 부여하고, 상권 공동 브랜딩 굿즈를 리워드로 제공합니다.</p>
+                        </div>
+                    </div>
+                    <div class="card solution-card cursor-pointer">
+                        <h3 class="text-xl font-bold mb-2">🤝 크로스 레코멘드</h3>
+                        <p class="text-gray-600 mb-4">경쟁 관계의 가게들을 협력 파트너로 전환하여 상생 생태계를 구축합니다.</p>
+                        <div class="details hidden mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-700"><strong>• 목표:</strong> 상권 내에서 자금이 순환하는 마이크로 경제를 만들어 전체 파이를 키웁니다.</p>
+                            <p class="text-sm text-gray-700 mt-2"><strong>• 실행:</strong> A가게 주문 완료 시, 인접한 B가게의 포장 전용 쿠폰을 자동으로 발급하여 자연스러운 소비 여정을 제안합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pilot Section -->
+        <section id="pilot" class="py-20 px-6">
+            <div class="container mx-auto">
+                <h2 class="section-title">어디서 시작하는가?</h2>
+                <p class="section-subtitle">
+                    서울의 가장 대표적인 두 상권 유형인 '도심업무지구'와 '대학가'에서 파일럿을 진행하여 모델의 효과성과 확장성을 동시에 검증합니다. 각 상권의 특성에 맞는 맞춤형 전략으로 성공 확률을 높입니다.
+                </p>
+                <div class="flex justify-center mb-8">
+                    <button id="gangnam-btn" class="tab-button active text-xl font-bold py-2 px-6">🏢 강남역 '케미스트릿'</button>
+                    <button id="kyunghee-btn" class="tab-button text-xl font-bold py-2 px-6">🎓 동대문 '경희담길'</button>
+                </div>
+
+                <div id="pilot-content" class="grid md:grid-cols-5 gap-8 items-center">
+                    <div class="md:col-span-2 card">
+                        <h3 id="pilot-name" class="text-3xl font-black mb-2">강남역 '케미스트릿'</h3>
+                        <p id="pilot-type" class="text-orange-500 font-bold mb-4">직장인 밀집형</p>
+                        <p id="pilot-desc" class="text-gray-600 mb-4">높은 유동인구와 임대료, 치열한 경쟁이 특징입니다. 짧은 점심시간에 폭증하는 수요를 감당하는 '런치 러시 병목 현상' 해결이 핵심 과제입니다.</p>
+                        <div class="mt-4 pt-4 border-t">
+                            <h4 class="font-bold mb-2">주요 적용 전략</h4>
+                            <p id="pilot-strategy" class="text-gray-700"><strong>QR 테이블오더</strong>와 <strong>런치 러시 패스트레인</strong>을 통해 피크타임 주문 처리량을 극대화하고 운영 효율을 개선합니다.</p>
+                        </div>
+                    </div>
+                    <div class="md:col-span-3">
+                        <div class="chart-container">
+                            <canvas id="kpiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Impact Section -->
+        <section id="impact" class="py-20 px-6 bg-white">
+            <div class="container mx-auto">
+                <h2 class="section-title">어떤 효과가 있는가?</h2>
+                <p class="section-subtitle">
+                    '당근 모델'은 단순한 편의 기능 제공을 넘어, 소상공인의 손익 구조를 직접적으로 개선하고 매장 운영의 핵심 지표를 향상시키는 실질적 가치를 제공합니다. 아래 시뮬레이션을 통해 경제적 효과를 직접 확인해보세요.
+                </p>
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div class="card">
+                        <h3 class="text-2xl font-bold mb-4">📈 순이익 개선 시뮬레이션</h3>
+                        <p class="text-gray-600 mb-6">월 매출 2,000만원, 플랫폼 매출 비중 30%인 가상 점포의 손익 변화입니다. 배달앱(수수료 9.8%) 이용 시와 당근(수수료 0%) 전환 시의 순이익을 비교해보세요.</p>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="profitChart"></canvas>
+                        </div>
+                        <div class="text-center mt-6">
+                            <button id="apply-daangn-btn" class="bg-orange-500 text-white font-bold py-3 px-8 rounded-full hover:bg-orange-600 transition duration-300">
+                               🥕 당근 모델 적용하기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="card">
+                            <h3 class="text-2xl font-bold mb-4">⚙️ 운영 효율성 증대</h3>
+                            <p class="text-gray-600 mb-6">QR 오더 도입은 주문/결제에 드는 노동력을 줄여, 테이블 회전율과 직원 생산성을 크게 향상시킵니다.</p>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <p class="text-4xl font-extrabold highlight">+26%</p>
+                                    <p class="text-gray-600">테이블 회전율 (점심 피크)</p>
+                                </div>
+                                <div>
+                                    <p class="text-4xl font-extrabold highlight">+40%</p>
+                                    <p class="text-gray-600">노동시간 당 주문 처리</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Roadmap & Governance Section -->
+        <section id="roadmap" class="py-20 px-6">
+            <div class="container mx-auto">
+                <h2 class="section-title">어떻게 실행하고, 누가 참여하는가?</h2>
+                <p class="section-subtitle">
+                    성공적인 프로젝트 수행을 위해 명확한 단계별 로드맵과 이해관계자별 역할(RACI)을 정의했습니다. 데이터 기반의 성과 측정을 통해 모델을 지속적으로 고도화하고 확산시킬 계획입니다.
+                </p>
+
+                <!-- Roadmap -->
+                <div class="mb-16">
+                    <h3 class="text-2xl font-bold text-center mb-8">단계별 확장 로드맵</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 max-w-5xl mx-auto">
+                        <div class="flex-1 text-center p-4">
+                            <div class="text-3xl font-extrabold text-orange-500">1단계</div>
+                            <div class="font-bold my-2">파일럿 실행 (8주)</div>
+                            <p class="text-sm text-gray-600">2개 상권에서 모델 검증 및 데이터 축적</p>
+                        </div>
+                        <div class="text-2xl text-orange-300 hidden md:block">→</div>
+                        <div class="flex-1 text-center p-4 bg-orange-50 rounded-lg">
+                            <div class="text-3xl font-extrabold text-orange-500">2단계</div>
+                            <div class="font-bold my-2">평가 및 고도화 (4주)</div>
+                            <p class="text-sm text-gray-600">데이터 분석, 피드백 반영, SOP 플레이북 완성</p>
+                        </div>
+                        <div class="text-2xl text-orange-300 hidden md:block">→</div>
+                        <div class="flex-1 text-center p-4">
+                            <div class="text-3xl font-extrabold text-orange-500">3단계</div>
+                            <div class="font-bold my-2">모델 확산 (2026년)</div>
+                            <p class="text-sm text-gray-600">4기 신규 상권 및 타 로컬브랜드 상권으로 확장</p>
+                        </div>
+                        <div class="text-2xl text-orange-300 hidden md:block">→</div>
+                        <div class="flex-1 text-center p-4 bg-orange-50 rounded-lg">
+                            <div class="text-3xl font-extrabold text-orange-500">4단계</div>
+                            <div class="font-bold my-2">정책 내재화 (2027년~)</div>
+                            <p class="text-sm text-gray-600">서울시 상권 육성사업의 상시 지원 프로그램으로 제도화</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Governance (RACI) -->
+                <div>
+                    <h3 class="text-2xl font-bold text-center mb-8">참여 주체별 역할 (RACI)</h3>
+                    <div class="card max-w-4xl mx-auto">
+                        <p class="text-center text-gray-600 mb-6">성공적인 민관협력을 위해 각 주체의 역할을 명확히 정의합니다. 궁금한 주체를 클릭하여 주요 역할을 확인해보세요.</p>
+                        <div class="flex flex-wrap justify-center gap-4 mb-8">
+                            <button class="raci-item py-2 px-5 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700" data-org="seoul">서울시</button>
+                            <button class="raci-item py-2 px-5 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700" data-org="district">자치구</button>
+                            <button class="raci-item py-2 px-5 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700" data-org="credit">서울신보</button>
+                            <button class="raci-item py-2 px-5 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700" data-org="council">상권협의체</button>
+                            <button class="raci-item py-2 px-5 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700" data-org="daangn">당근</button>
+                        </div>
+                        <div id="raci-details" class="space-y-3">
+                            <!-- RACI details will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>서울시 로컬브랜드 상권 육성사업 × 당근 상생 제휴 파일럿</p>
+            <p class="text-sm text-gray-400 mt-2">지속가능한 동네 상권을 위한 혁신적인 민관협력 모델</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Smooth scrolling for nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Solution cards interaction
+            const solutionCards = document.querySelectorAll('.solution-card');
+            solutionCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const details = card.querySelector('.details');
+                    details.classList.toggle('hidden');
+                    card.classList.toggle('bg-orange-50');
+                });
+            });
+
+            // Pilot section data and chart
+            const pilotData = {
+                gangnam: {
+                    name: "강남역 '케미스트릿'",
+                    type: "직장인 밀집형",
+                    desc: "높은 유동인구와 임대료, 치열한 경쟁이 특징입니다. 짧은 점심시간에 폭증하는 수요를 감당하는 '런치 러시 병목 현상' 해결이 핵심 과제입니다.",
+                    strategy: "<strong>QR 테이블오더</strong>와 <strong>런치 러시 패스트레인</strong>을 통해 피크타임 주문 처리량을 극대화하고 운영 효율을 개선합니다.",
+                    kpi: {
+                        labels: ['가맹 점포', '포장주문(건)', 'QR주문(건)', '활성점포율(%)'],
+                        data: [100, 5000, 3000, 40]
+                    }
+                },
+                kyunghee: {
+                    name: "동대문 '경희담길'",
+                    type: "대학가 체류형",
+                    desc: "젊고 유동적인 인구, 소규모 독립 점포들이 특징입니다. 고객의 상권 내 체류 시간을 늘리고 충성도를 확보하는 것이 핵심 과제입니다.",
+                    strategy: "<strong>상권 스탬프런</strong>과 <strong>크로스 레코멘드</strong>를 통해 상권 탐색의 재미를 부여하고, 가게 간 협력 생태계를 구축합니다.",
+                    kpi: {
+                        labels: ['가맹 점포', '포장주문(건)', 'QR주문(건)', '활성점포율(%)'],
+                        data: [80, 6000, 1500, 50]
+                    }
+                }
+            };
+
+            const kpiCtx = document.getElementById('kpiChart').getContext('2d');
+            let kpiChart;
+
+            function createKpiChart(data) {
+                if (kpiChart) {
+                    kpiChart.destroy();
+                }
+                kpiChart = new Chart(kpiCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: '8주 파일럿 목표',
+                            data: data.data,
+                            backgroundColor: ['#FFC107', '#4CAF50', '#2196F3', '#F44336'],
+                            borderRadius: 5,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: '상권별 핵심성과지표(KPI) 목표',
+                                font: { size: 16, weight: 'bold' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            let value = context.parsed.y;
+                                            if (context.label.includes('%')) {
+                                                label += value + '%';
+                                            } else {
+                                                label += value.toLocaleString() + ' 건';
+                                            }
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#e9e9e9',
+                                    borderColor: '#e9e9e9'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const gangnamBtn = document.getElementById('gangnam-btn');
+            const kyungheeBtn = document.getElementById('kyunghee-btn');
+            const pilotName = document.getElementById('pilot-name');
+            const pilotType = document.getElementById('pilot-type');
+            const pilotDesc = document.getElementById('pilot-desc');
+            const pilotStrategy = document.getElementById('pilot-strategy');
+
+            function updatePilotContent(pilotKey) {
+                const data = pilotData[pilotKey];
+                pilotName.textContent = data.name;
+                pilotType.textContent = data.type;
+                pilotDesc.textContent = data.desc;
+                pilotStrategy.innerHTML = data.strategy;
+                createKpiChart(data.kpi);
+
+                if (pilotKey === 'gangnam') {
+                    gangnamBtn.classList.add('active');
+                    kyungheeBtn.classList.remove('active');
+                } else {
+                    kyungheeBtn.classList.add('active');
+                    gangnamBtn.classList.remove('active');
+                }
+            }
+
+            gangnamBtn.addEventListener('click', () => updatePilotContent('gangnam'));
+            kyungheeBtn.addEventListener('click', () => updatePilotContent('kyunghee'));
+
+            updatePilotContent('gangnam'); // Initial load
+
+            // Impact section chart
+            const profitCtx = document.getElementById('profitChart').getContext('2d');
+            let profitChart;
+            const initialProfitData = {
+                labels: ['배달앱 의존 모델', '당근 파일럿 모델'],
+                datasets: [{
+                    label: '월 순이익 (원)',
+                    data: [4412000, 4412000],
+                    backgroundColor: ['#9E9E9E', '#FFC107'],
+                    borderRadius: 5,
+                }]
+            };
+            const updatedProfitData = [4412000, 5000000];
+
+            function createProfitChart() {
+                profitChart = new Chart(profitCtx, {
+                    type: 'bar',
+                    data: initialProfitData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.parsed.x.toLocaleString()} 원`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (value) => `${(value / 1000000)}백만`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            createProfitChart();
+
+            document.getElementById('apply-daangn-btn').addEventListener('click', function() {
+                profitChart.data.datasets[0].data = updatedProfitData;
+                profitChart.update();
+                this.textContent = '✅ 적용 완료! 순이익 13.3% 개선';
+                this.disabled = true;
+                this.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                this.classList.add('bg-green-500', 'cursor-not-allowed');
+            });
+
+            // RACI Governance Section
+            const raciData = {
+                seoul: [
+                    { task: '프로젝트 총괄 및 예산 확보', role: 'A (최종 책임)' },
+                    { task: '온·오프라인 홍보 및 PR', role: 'A (최종 책임)' },
+                ],
+                district: [
+                    { task: '상인 모집 및 참여 독려', role: 'R (실행 책임)' },
+                    { task: '현장 교육 및 키트 배포', role: 'R (실행 책임)' },
+                    { task: '온·오프라인 홍보 및 PR', role: 'R (실행 책임)' },
+                ],
+                credit: [
+                    { task: '디지털 역량 강화 교육', role: 'A (최종 책임)' },
+                    { task: '현장 교육 및 키트 배포', role: 'R (실행 책임)' },
+                ],
+                council: [
+                    { task: '캠페인 예산 집행 및 관리', role: 'A (최종 책임)' },
+                    { task: '상인 모집 및 참여 독려', role: 'R (실행 책임)' },
+                ],
+                daangn: [
+                    { task: '플랫폼 운영 및 기술 지원', role: 'A (최종 책임)' },
+                    { task: '데이터 수집·분석 및 보고', role: 'A (최종 책임)' },
+                    { task: '디지털 역량 강화 교육', role: 'R (실행 책임)' },
+                    { task: '온·오프라인 홍보 및 PR', role: 'R (실행 책임)' },
+                    { task: '캠페인 예산 집행 및 관리', role: 'R (실행 책임)' },
+                ]
+            };
+
+            const raciItems = document.querySelectorAll('.raci-item');
+            const raciDetailsContainer = document.getElementById('raci-details');
+
+            function updateRaciDetails(orgKey) {
+                raciItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.org === orgKey) {
+                        item.classList.add('active');
+                    }
+                });
+
+                const orgData = raciData[orgKey];
+                raciDetailsContainer.innerHTML = '';
+                if (orgData) {
+                    orgData.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'raci-role p-4 rounded-lg flex justify-between items-center bg-gray-50';
+                        const taskP = document.createElement('p');
+                        taskP.className = 'font-medium text-gray-800';
+                        taskP.textContent = item.task;
+                        const roleSpan = document.createElement('span');
+                        roleSpan.className = 'font-bold text-orange-600 text-sm py-1 px-3 bg-orange-100 rounded-full';
+                        roleSpan.textContent = item.role;
+                        
+                        div.appendChild(taskP);
+                        div.appendChild(roleSpan);
+                        raciDetailsContainer.appendChild(div);
+                    });
+                }
+            }
+            
+            raciItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    updateRaciDetails(item.dataset.org);
+                });
+            });
+
+            // Initial RACI view
+            updateRaciDetails('daangn');
+        });
+    </script>
+</body>
+</html>
